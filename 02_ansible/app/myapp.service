@@ -1,0 +1,11 @@
+[Unit]
+Description=My application
+After=network.target
+
+[Service]
+Type=simple
+Restart=always
+ExecStart=/app/myapp.py
+
+[Install]
+WantedBy=multi-user.target
