@@ -1,0 +1,186 @@
+---
+- name: Updated all packages, disable firewalld and SELinux on all servers
+  hosts: all
+  become: true
+
+  tasks:
+    - name: Update packages
+      dnf:
+        name: "*"
+        state: latest
+      tags: ['packages']
+
+    - name: Disable SELinux
+      selinux:
+        state: disabled
+      tags: ['selinux']
+
+    - name: Disable firewalld service
+      service:
+        name: firewalld
+        enabled: no
+        state: stopped
+      tags: ['services', 'firewall']
+
+
+- name: Configure web frontend
+  hosts: web
+  become: true
+
+  tasks:
+    - name: Install nginx package
+      dnf:
+        name: ['nginx']
+        state: present
+      tags: ['packages', 'www']
+
+    - name: Create 'www' group
+      group:
+        name: www
+        state: present
+      tags: ['users', 'www']
+
+    - name: Create 'www' user
+      user:
+        name: www
+        group: www
+        create_home: no
+        shell: /usr/sbin/nologin
+        state: present
+      tags: ['users', 'www']
+
+    - name: Upload nginx.conf
+      copy:
+        src: ./web/nginx.conf
+        dest: /etc/nginx/nginx.conf
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Upload fullchain.pem
+      copy:
+        src: ./web/fullchain.pem
+        dest: /etc/nginx/fullchain.pem
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Upload privkey.pem
+      copy:
+        src: ./web/privkey.pem
+        dest: /etc/nginx/privkey.pem
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Enable and start nginx service
+      service:
+        name: nginx
+        enabled: yes
+        state: started
+      tags: ['services', 'www']
+
+
+- name: Configure database server
+  hosts: db
+  become: true
+
+  tasks:
+    - name: Install MariaDB and PyMySQL packages
+      dnf:
+        name: ['mariadb-server', 'python3-PyMySQL', 'python39-PyMySQL']
+        state: present
+      tags: ['packages', 'db']
+
+    - name: Enable and start MariaDB services
+      service:
+        name: mariadb
+        enabled: yes
+        state: started
+      tags: ['services', 'db']
+
+    - name: Upload database dump
+      copy:
+        src: ./db/myapp.sql
+        dest: /tmp/myapp.sql
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Import database dump
+      shell: mysql -uroot < /tmp/myapp.sql 2>/dev/null || true
+
+    # This requires community module: $(ansible-galaxy collection install community.mysql)
+    # https://docs.ansible.com/ansible/latest/collections/community/mysql/mysql_db_module.html
+    - name: Removes anonymous users
+      community.mysql.mysql_user:
+        name: ''
+        host_all: yes
+        state: absent
+
+    - name: Set root password
+      community.mysql.mysql_user:
+        name: root
+        password: root
+        priv: '*.*:ALL'
+        state: present
+
+
+- name: Configure application server
+  hosts: app
+  become: true
+
+  tasks:
+    - name: Install Python and PyMySQL packages
+      dnf:
+        name: ['python39', 'python39-PyMySQL']
+        state: present
+      tags: ['packages', 'app']
+
+    - name: Create 'app' group
+      group:
+        name: app
+        state: present
+      tags: ['users', 'app']
+
+    - name: Create 'app' user
+      user:
+        name: app
+        group: app
+        create_home: no
+        state: present
+      tags: ['users', 'app']
+
+    - name: Create application directory
+      file:
+        path: /app
+        state: directory
+        mode: '0755'
+        owner: app
+        group: app
+      tags: ['app']
+
+    - name: Upload myapp.py
+      copy:
+        src: ./app/myapp.py
+        dest: /app/myapp.py
+        owner: app
+        group: app
+        mode: '0744'
+        
+    - name: Create service for myapp.py
+      copy:
+        src: ./app/myapp.service
+        dest: /usr/lib/systemd/system/myapp.service
+        owner: root
+        group: root
+        mode: '0644'
+        
+    - name: Run daemon-reload, enable and start myapp service
+      service:
+        name: myapp
+        enabled: yes
+        state: started
+        daemon_reload: yes
+      tags: ['services', 'app']
+
