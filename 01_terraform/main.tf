@@ -9,15 +9,15 @@ terraform {
 
 # Configure the AWS Provider
 provider "aws" {
-  region = "us-east-1"
-  access_key = ""
-  secret_key = ""
+  region = var.region
+  access_key = var.access_key
+  secret_key = var.secret_key
 }
 
 # SSH key - external
 resource "aws_key_pair" "ssh-key" {
   key_name = "ssh-key"
-  public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCzx0yDAl/5gcgdtGg3lBT8CDgX7L3Aq4ESCbAL8Qy4Nv6jez6JRD4vvA3rGZmP5MuBzC16gBUIGqIeu53Re451on6ZVsYcx5mQYAMhxWsnxdIiQxX7JvrR7E2hVlnG6NXC5N5bAOx1iQyzM3qgsA77QI9v1gIfp1OA8wPd1tLYiPpfxRCAWigZlAkLHfC+VFs+3dZHgxrPp2Oa1DgNenWg7FtEFvVgH/Yd1VbihftqSuQGt5+4VrOghS5kiAoVdrDzEQnVfhuQoackfXjSdHlptxSI0mStHbRGH/h638bv17NtWty2qvSD30Kc8WsA15aj8FuYbWsMZpOUoMkodsNSeZ9e8mfdBSuP/pvnnZidKhzWEB5RVlOg+9LIm0tOPoxtY7Mh+4alWdgyi+SSbpojiTVwht575JGLUfGC9t8Wg5384d5CFz5rKvRvxWuPeZoInNfbLULHAAwsqd7Yw/JVHhecShhriOIvndieqhT7mwJFn+cJhPv/lLiFApivS5M= root@f35dev"
+  public_key = var.ssh_public_key
 }
 
 # Create vpc
@@ -99,7 +99,15 @@ resource "aws_security_group" "allow_web" {
     from_port   = 8080
     to_port     = 8080
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = ["10.0.1.0/24"]
+  }
+
+  ingress {
+    description = "Database"
+    from_port   = 3306
+    to_port     = 3306
+    protocol    = "tcp"
+    cidr_blocks = ["10.0.1.0/24"]
   }
 
   egress {
@@ -209,18 +217,3 @@ resource "aws_instance" "database-server-instance" {
   }
 }
 
-output "web_server_public_ip" {
-  value = aws_instance.web-server-instance.public_ip
-}
-
-output "web_server_private_ip" {
-  value = aws_instance.web-server-instance.private_ip
-}
-
-output "app_server_private_ip" {
-  value = aws_instance.application-server-instance.private_ip
-}
-
-output "db_server_private_ip" {
-  value = aws_instance.database-server-instance.private_ip
-}

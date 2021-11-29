@@ -6,6 +6,11 @@ Terraform script to deploy 3 servers in AWS:
 
 # Usage
 ```terraform init
+terraform validate
 terraform plan
 terraform apply
 ```
+
+To remove provisioned server(s):
+```terraform destroy```
+
