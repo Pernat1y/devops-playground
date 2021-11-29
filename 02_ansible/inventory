@@ -1,8 +1,9 @@
 [web]
-10.1.0.39
+control ansible_connection=local
 
 [app]
-10.1.0.39
+10.0.1.51
 
 [db]
-10.1.0.39
+10.0.1.52
+

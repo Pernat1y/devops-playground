@@ -10,7 +10,7 @@ except ImportError:
 
 
 # DB options
-db_host = '127.0.0.1'
+db_host = '10.1.0.52'
 db_user = 'root'
 db_pass = 'root'
 db_name = 'myapp'
