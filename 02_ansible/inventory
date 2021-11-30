@@ -2,8 +2,8 @@
 control ansible_connection=local
 
 [app]
-10.0.1.51
+10.0.1.51 ansible_user=ec2-user
 
 [db]
-10.0.1.52
+10.0.1.52 ansible_user=ec2-user
 

@@ -167,7 +167,7 @@
         owner: app
         group: app
         mode: '0744'
-        
+
     - name: Create service for myapp.py
       copy:
         src: ./app/myapp.service
@@ -175,7 +175,7 @@
         owner: root
         group: root
         mode: '0644'
-        
+
     - name: Run daemon-reload, enable and start myapp service
       service:
         name: myapp
