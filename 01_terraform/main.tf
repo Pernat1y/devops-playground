@@ -152,20 +152,6 @@ resource "aws_eip" "web_eip" {
   depends_on                = [aws_internet_gateway.gw]
 }
 
-resource "aws_eip" "app_eip" {
-  vpc                       = true
-  network_interface         = aws_network_interface.app-server-nic.id
-  associate_with_private_ip = "10.0.1.51"
-  depends_on                = [aws_internet_gateway.gw]
-}
-
-resource "aws_eip" "db_eip" {
-  vpc                       = true
-  network_interface         = aws_network_interface.db-server-nic.id
-  associate_with_private_ip = "10.0.1.52"
-  depends_on                = [aws_internet_gateway.gw]
-}
-
 # Create an instance (web)
 resource "aws_instance" "web-server-instance" {
   ami               = "ami-0b0af3577fe5e3532"
