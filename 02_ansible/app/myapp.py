@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+import time
 from http.server import BaseHTTPRequestHandler
 from http.server import HTTPServer
 try:
@@ -21,12 +22,18 @@ listen_port = 8080
 
 # Connect to the database
 def db_connect():
-    connection = pymysql.connect(host=db_host,
-                                 user=db_user,
-                                 password=db_pass,
-                                 database=db_name,
-                                 cursorclass=pymysql.cursors.DictCursor)
-    return connection
+    while True:
+        try:
+            connection = pymysql.connect(host=db_host,
+                                         user=db_user,
+                                         password=db_pass,
+                                         database=db_name,
+                                         cursorclass=pymysql.cursors.DictCursor)
+        except:
+            print(f'Unable to connect to database on {db_host}. Retrying...')
+            time.sleep(5)
+            continue
+        return connection
 
 def create_test_data():
     connection = db_connect()
