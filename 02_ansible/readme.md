@@ -5,8 +5,8 @@ Ansible script to configure 3 pre-provisioned servers:
 * Backend DB server: MariaDB
 
 # Usage
-* 1. Place valid certificates to 'web' directory
-* 2. ```ansible-galaxy collection install community.mysql
+* Place valid certificates to 'web' directory
+* ```ansible-galaxy collection install community.mysql
 ansible-playbook --syntax-check --inventory inventory playbook.yml
 ansible-playbook --inventory inventory playbook.yml```
 
