@@ -20,6 +20,7 @@
         name: firewalld
         enabled: no
         state: stopped
+      ignore_errors: yes
       tags: ['services', 'firewall']
 
 
