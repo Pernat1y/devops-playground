@@ -6,7 +6,8 @@ Ansible script to configure 3 pre-provisioned servers:
 
 # Usage
 * Place valid certificates to 'web' directory
-* ```ansible-galaxy collection install community.mysql
+* Run playbook:
+```ansible-galaxy collection install community.mysql
 ansible-playbook --syntax-check --inventory inventory playbook.yml
 ansible-playbook --inventory inventory playbook.yml```
 
